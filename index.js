@@ -36,10 +36,6 @@ const xmlToJson = (url, callback) => {
 };
 
 
-
-
-
-
 const readJsonPromise = (url) => {
   return new Promise((resolve, reject) => {
     xmlToJson(url, (err, data) => {
@@ -50,27 +46,38 @@ const readJsonPromise = (url) => {
 };
 
 const getJson = () => {
+    let audioURLArray = [];
   readJsonPromise("https://rights.culturalsurvival.org/blueprint-xml")
     .then((data) => {
-    var newData = data.radio_spots.radio_spot;
-    var audioURLArray = []
-    var audioURLs = newData.map(item => {
+    let newData = data.radio_spots.radio_spot;
+    // let audioURLArray = []
+    let audioURLs = newData.map(item => {
         audioURLArray.push(item.SoundCloud[0])
     })
-     console.log("First element:", audioURLArray);
-    return audioURLArray;
+    //  console.log("First element:", audioURLArray);
+    // return audioURLArray;
+    console.log(getTrack('https://soundcloud.com/culturalsurvival/dia-universal-del-nino-y-de-la-nina'))
+    audioURLArray.forEach((url, index) => {
+      audioURLArray[index] = cleanUrl(url)
     })
+    
+   })
+    
     .catch((err) => {
       /* Handle error */
     });
 };
 
+const cleanUrl = (url) => {
+  let newUrl = url.split('?')
+  return newUrl[0]
+}
 
-const getUrls = () => {
-  var json = getJson();
-};
 
-getUrls();
+getJson();
+
+
+
 // soundcloud scraper
 
 const getTrack = (url) => {
@@ -89,9 +96,13 @@ const getTrack = (url) => {
     .catch(console.error);
 };
 
-const getTracks = (urls) => {
-  urls.forEach((url) => getTrack(url));
-};
+// const getTracks = (urls) => {
+//   urls.forEach((url) => getTrack(url)); 
+// };
+
+
+
+//two ways: pass inurl as parameter to call getURL before i call get tracks 
 
 // app.get("/", (req, res) => {
 //   res.send("First request");
