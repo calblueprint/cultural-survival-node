@@ -27,6 +27,7 @@
     "soundcloud.ts": "^0.4.9",
 =======
     "fs": "^0.0.1-security",
+    "mongodb": "^4.12.0",
     "nodemon": "^2.0.20",
     "rss-parser": "^3.12.0",
     "rss-to-json": "^2.1.0",
