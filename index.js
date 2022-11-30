@@ -35,14 +35,7 @@ const xmlToJson = (url, callback) => {
   });
 };
 
-<<<<<<< HEAD
-=======
 
-
-
-
-
->>>>>>> e5bfd397b90fc0df4cef1c7b097625ac85b6aa10
 const readJsonPromise = (url) => {
   return new Promise((resolve, reject) => {
     xmlToJson(url, (err, data) => {
@@ -53,46 +46,38 @@ const readJsonPromise = (url) => {
 };
 
 const getJson = () => {
+    let audioURLArray = [];
   readJsonPromise("https://rights.culturalsurvival.org/blueprint-xml")
     .then((data) => {
-<<<<<<< HEAD
-      /* Do something with data */
-      var result = JSON.stringify(data);
-      console.log(result);
-      return result;
-      // fs.writeFile("test.json", JSON.stringify(data), "utf8", function (err) {
-      //   if (err) {
-      //     console.log("An error occured while writing JSON Object to File.");
-      //     return console.log(err);
-      //   }
-      // });
-=======
-    var newData = data.radio_spots.radio_spot;
-    var audioURLArray = []
-    var audioURLs = newData.map(item => {
+    let newData = data.radio_spots.radio_spot;
+    // let audioURLArray = []
+    let audioURLs = newData.map(item => {
         audioURLArray.push(item.SoundCloud[0])
     })
-     console.log("First element:", audioURLArray);
-    return audioURLArray;
->>>>>>> e5bfd397b90fc0df4cef1c7b097625ac85b6aa10
+    //  console.log("First element:", audioURLArray);
+    // return audioURLArray;
+    console.log(getTrack('https://soundcloud.com/culturalsurvival/dia-universal-del-nino-y-de-la-nina'))
+    audioURLArray.forEach((url, index) => {
+      audioURLArray[index] = cleanUrl(url)
     })
+    
+   })
+    
     .catch((err) => {
       /* Handle error */
     });
 };
 
-<<<<<<< HEAD
-const getUrls = () => {
-  var json = getJson();
-  console.log(json);
-=======
+const cleanUrl = (url) => {
+  let newUrl = url.split('?')
+  return newUrl[0]
+}
 
-const getUrls = () => {
-  var json = getJson();
->>>>>>> e5bfd397b90fc0df4cef1c7b097625ac85b6aa10
-};
 
-getUrls();
+getJson();
+
+
+
 // soundcloud scraper
 
 const getTrack = (url) => {
@@ -111,9 +96,13 @@ const getTrack = (url) => {
     .catch(console.error);
 };
 
-const getTracks = (urls) => {
-  urls.forEach((url) => getTrack(url));
-};
+// const getTracks = (urls) => {
+//   urls.forEach((url) => getTrack(url)); 
+// };
+
+
+
+//two ways: pass inurl as parameter to call getURL before i call get tracks 
 
 // app.get("/", (req, res) => {
 //   res.send("First request");
@@ -122,8 +111,6 @@ const getTracks = (urls) => {
 // app.listen(3000, () => {
 //   console.log("Listening");
 // });
-<<<<<<< HEAD
-=======
 
 
 
@@ -272,4 +259,3 @@ const getTracks = (urls) => {
 // // }
 
 // // useAPI()
->>>>>>> e5bfd397b90fc0df4cef1c7b097625ac85b6aa10
