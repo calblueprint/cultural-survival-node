@@ -1,5 +1,7 @@
 const { MongoClient } = require("mongodb");
+const mongodb = require("mongodb");
 var index = require("./audio_scraper");
+const fs = require("fs");
 
 async function main() {
   /**
@@ -38,12 +40,26 @@ main().catch(console.error);
 
 // Add functions that make DB calls here
 
-async function createAudio(client, newAudio) {
-  const result = await client
-    .db("cultural-survival-mobile")
-    .collection("audio")
-    .insertOne(newAudio);
-  console.log(
-    `New listing created with the following id: ${result.insertedId}`
+// async function createAudio(client, newAudio) {
+//   const result = await client
+//     .db("cultural-survival-mobile")
+//     .collection("audio")
+//     .insertOne(newAudio);
+//   console.log(
+//     `New listing created with the following id: ${result.insertedId}`
+//   );
+// }
+
+async function createAudio(client, metadata_insert) {
+  const db = client.db("cultural-survival-mobile");
+  const bucket = new mongodb.GridFSBucket(db, { bucketName: "audio" });
+
+  //uploading files
+  let filename = metadata_insert["mp3filename"];
+  fs.createReadStream(`./audio/${filename}.mp3`).pipe(
+    bucket.openUploadStream(`${filename}.mp3`, {
+      chunkSizeBytes: 1048576,
+      metadata: metadata_insert,
+    })
   );
 }
