@@ -1,6 +1,7 @@
 const SoundCloud = require("soundcloud-scraper");
 var parseString = require("xml2js").parseString;
 var http = require("https");
+const fs = require("fs");
 
 const xmlToJson = (url) => {
   return new Promise((resolve, reject) => {
@@ -40,7 +41,6 @@ const pullRecords = async () => {
   audioURLArray.forEach((url, index) => {
     audioURLArray[index] = cleanUrl(url);
   });
-  console.log(audioURLArray);
   let records = [];
   for (const url of audioURLArray) {
     let record = await getAudioInfo(url);
@@ -57,6 +57,14 @@ const cleanUrl = (url) => {
 const getAudioInfo = async (url) => {
   const client = new SoundCloud.Client();
   let song = await client.getSongInfo(url);
+
+  const stream = await song.downloadProgressive();
+  const writer = stream.pipe(fs.createWriteStream(`./audio/${song.title}.mp3`));
+  let filename = song.title;
+  writer.on("finish", () => {
+    console.log("Finished writing song!");
+  });
+
   let record = {
     title: song["title"],
     description: song["description"],
@@ -67,7 +75,9 @@ const getAudioInfo = async (url) => {
     author: song["author"],
     publishedAt: song["publishedAt"],
     trackURL: song["trackURL"],
+    mp3filename: filename,
   };
+  console.log(record);
   return record;
 };
 
