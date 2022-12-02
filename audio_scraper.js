@@ -42,7 +42,10 @@ const pullRecords = async () => {
     audioURLArray[index] = cleanUrl(url);
   });
   let records = [];
-  for (const url of audioURLArray) {
+  // FIXME: truncating audioURLArray for testing purposes
+  let testURLs = audioURLArray.slice(2, 6);
+  console.log(testURLs);
+  for (const url of testURLs) {
     let record = await getAudioInfo(url);
     records.push(record);
   }
@@ -77,7 +80,6 @@ const getAudioInfo = async (url) => {
     trackURL: song["trackURL"],
     mp3filename: filename,
   };
-  console.log(record);
   return record;
 };
 
