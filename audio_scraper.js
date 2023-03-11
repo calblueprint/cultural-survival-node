@@ -42,8 +42,8 @@ const pullRecords = async () => {
     audioURLArray[index] = cleanUrl(url);
   });
   let records = [];
-  // FIXME: truncating audioURLArray for testing purposes
-  let testURLs = audioURLArray.slice(2, 6);
+  // // FIXME: truncating audioURLArray for testing purposes
+  let testURLs = audioURLArray.slice(0, 6);
   console.log(testURLs);
   for (const url of testURLs) {
     let record = await getAudioInfo(url);
@@ -57,16 +57,40 @@ const cleanUrl = (url) => {
   return newUrl[0];
 };
 
+const cleanSongTitle = (songTitle) => {
+  // let newSongTitle = songTitle.replace("?", " ");
+  let newSongTitle = songTitle.replace(/[^a-z0-9]/gi, "");
+  return newSongTitle;
+};
+
 const getAudioInfo = async (url) => {
   const client = new SoundCloud.Client();
   let song = await client.getSongInfo(url);
 
   const stream = await song.downloadProgressive();
-  const writer = stream.pipe(fs.createWriteStream(`./audio/${song.title}.mp3`));
+  const writer = stream.pipe(
+    fs.createWriteStream(`./audio/${cleanSongTitle(song.title)}.mp3`)
+  );
   let filename = song.title;
   writer.on("finish", () => {
     console.log("Finished writing song!");
   });
+
+  // const client = new SoundCloud.Client();
+  // let song = await client.getSongInfo(url);
+  // client
+  //   .getSongInfo(url)
+  //   .then(async (song) => {
+  //     const stream = await song.downloadProgressive();
+  //     const writer = stream.pipe(
+  //       fs.createWriteStream(`./audio/${cleanSongTitle(song.title)}.mp3`)
+  //     );
+  //     writer.on("finish", () => {
+  //       console.log("Finished writing song!");
+  //       process.exit(1);
+  //     });
+  //   })
+  //   .catch(console.error);
 
   let record = {
     title: song["title"],
@@ -89,3 +113,6 @@ module.exports = {
   cleanUrl,
   getAudioInfo,
 };
+
+/* Download audio files locally. */
+pullRecords();
