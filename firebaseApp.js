@@ -1,7 +1,9 @@
 const { initializeApp } = require("firebase/app");
 const { getFirestore, setDoc, doc } = require("firebase/firestore");
 const { pullRecords } = require("./audioScraper");
+const { getGcsLink, pushAudio } = require("./server");
 require("dotenv").config();
+const fsExtra = require("fs-extra");
 
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
@@ -20,13 +22,16 @@ const db = getFirestore(app);
 async function setAudio() {
   const records = await pullRecords();
   for (const item of records) {
+    await pushAudio("./audio/" + item["SoundCloud Metadata"]["mp3filename"]);
+    const pulledLink = await getGcsLink(
+      item["SoundCloud Metadata"]["mp3filename"]
+    );
     if (!("Country" in item)) {
       item["Country"] = ["None"];
     }
     if (!("Language" in item)) {
       item["Language"] = ["None"];
     }
-    console.log(item["SoundCloud Metadata"]["id"]);
     const audioRef = doc(db, "audio", item["SoundCloud Metadata"]["id"]);
     await setDoc(audioRef, {
       title: item["Title"][0],
@@ -39,10 +44,12 @@ async function setAudio() {
       duration: item["SoundCloud Metadata"]["duration"],
       publishedAt: item["SoundCloud Metadata"]["publishedAt"],
       mp3filename: item["SoundCloud Metadata"]["mp3filename"],
+      gcsLink: pulledLink,
     });
-    console.log("finished pushing song metadata");
+    console.log("Pushed audio metadata to Firestore.");
   }
-  return "done";
+  fsExtra.emptyDirSync("./audio");
+  return "Done.";
 }
 
 async function main() {
