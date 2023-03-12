@@ -35,10 +35,14 @@ const pullRecords = async () => {
   );
   let newData = data.radio_spots.radio_spot;
   for (const item of newData) {
-    item["SoundCloud"][0] = cleanUrl(item["SoundCloud"][0]);
+    item["SoundCloudCleaned"] = [cleanUrl(item["SoundCloud"][0])];
   }
+  // FIXME: remove testData and replace with newData to update all audio from XML instead of first 6
+  // const testData = newData.slice(0, 6);
   for (const item of newData) {
-    item["SoundCloud Metadata"] = await getAudioInfo(item["SoundCloud"][0]);
+    item["SoundCloud Metadata"] = await getAudioInfo(
+      item["SoundCloudCleaned"][0]
+    );
   }
   return newData;
 };

@@ -19,6 +19,21 @@ const app = initializeApp(firebaseConfig);
 
 const db = getFirestore(app);
 
+function stringCleanup(item, string) {
+  if (string in item) {
+    var arr = item[string][0].split(", ");
+    if (string == "Country") {
+      arr = arr.filter(
+        (elem) =>
+          elem !== "Plurinational State of" && elem !== "Bolivarian Republic of"
+      );
+    }
+    return arr;
+  } else {
+    return ["None"];
+  }
+}
+
 async function setAudio() {
   const records = await pullRecords();
   for (const item of records) {
@@ -26,12 +41,12 @@ async function setAudio() {
     const pulledLink = await getGcsLink(
       item["SoundCloud Metadata"]["mp3filename"]
     );
-    if (!("Country" in item)) {
-      item["Country"] = ["None"];
-    }
-    if (!("Language" in item)) {
-      item["Language"] = ["None"];
-    }
+    item["Theme"] = [stringCleanup(item, "Theme")];
+    item["Language"] = [stringCleanup(item, "Language")];
+    item["Indigenous-Languages"] = [
+      stringCleanup(item, "Indigenous-Languages"),
+    ];
+    item["Country"] = [stringCleanup(item, "Country")];
     const audioRef = doc(db, "audio", item["SoundCloud Metadata"]["id"]);
     await setDoc(audioRef, {
       title: item["Title"][0],
@@ -39,7 +54,9 @@ async function setAudio() {
       format: item["Format"][0],
       theme: item["Theme"][0],
       language: item["Language"][0],
+      indigenousLanguage: item["Indigenous-Languages"][0],
       country: item["Country"][0],
+      xmlSoundCloud: item["SoundCloud"][0],
       thumbnail: item["SoundCloud Metadata"]["thumbnail"],
       duration: item["SoundCloud Metadata"]["duration"],
       publishedAt: item["SoundCloud Metadata"]["publishedAt"],
