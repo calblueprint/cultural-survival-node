@@ -30,26 +30,20 @@ const xmlToJson = (url) => {
 };
 
 const pullRecords = async () => {
-  let audioURLArray = [];
   var data = await xmlToJson(
     "https://rights.culturalsurvival.org/blueprint-xml"
   );
   let newData = data.radio_spots.radio_spot;
-  newData.map((item) => {
-    audioURLArray.push(item.SoundCloud[0]);
-  });
-  audioURLArray.forEach((url, index) => {
-    audioURLArray[index] = cleanUrl(url);
-  });
-  let records = [];
-  // // FIXME: truncating audioURLArray for testing purposes
-  let testURLs = audioURLArray.slice(0, 6);
-  console.log(testURLs);
-  for (const url of testURLs) {
-    let record = await getAudioInfo(url);
-    records.push(record);
+  for (const item of newData) {
+    item["SoundCloud"][0] = cleanUrl(item["SoundCloud"][0]);
   }
-  return records;
+  // // FIXME: truncating audioURLArray for testing purposes
+  let testData = newData.slice(0, 6);
+  for (const item of testData) {
+    item["SoundCloud Metadata"] = await getAudioInfo(item["SoundCloud"][0]);
+  }
+  // console.log(testData);
+  return testData;
 };
 
 const cleanUrl = (url) => {
@@ -58,7 +52,6 @@ const cleanUrl = (url) => {
 };
 
 const cleanSongTitle = (songTitle) => {
-  // let newSongTitle = songTitle.replace("?", " ");
   let newSongTitle = songTitle.replace(/[^a-z0-9]/gi, "");
   return newSongTitle;
 };
@@ -66,42 +59,27 @@ const cleanSongTitle = (songTitle) => {
 const getAudioInfo = async (url) => {
   const client = new SoundCloud.Client();
   let song = await client.getSongInfo(url);
-
+  // console.log(song);
   const stream = await song.downloadProgressive();
   const writer = stream.pipe(
     fs.createWriteStream(`./audio/${cleanSongTitle(song.title)}.mp3`)
   );
-  let filename = song.title;
+  let filename = cleanSongTitle(song.title);
   writer.on("finish", () => {
     console.log("Finished writing song!");
   });
-
-  // const client = new SoundCloud.Client();
-  // let song = await client.getSongInfo(url);
-  // client
-  //   .getSongInfo(url)
-  //   .then(async (song) => {
-  //     const stream = await song.downloadProgressive();
-  //     const writer = stream.pipe(
-  //       fs.createWriteStream(`./audio/${cleanSongTitle(song.title)}.mp3`)
-  //     );
-  //     writer.on("finish", () => {
-  //       console.log("Finished writing song!");
-  //       process.exit(1);
-  //     });
-  //   })
-  //   .catch(console.error);
-
+  // console.log(song);
   let record = {
+    id: song["id"],
     title: song["title"],
-    description: song["description"],
+    // description: song["description"],
     thumbnail: song["thumbnail"],
-    url: song["url"],
+    // url: song["url"],
     duration: song["duration"],
-    genre: song["genre"],
-    author: song["author"],
+    // genre: song["genre"],
+    // author: song["author"],
     publishedAt: song["publishedAt"],
-    trackURL: song["trackURL"],
+    // trackURL: song["trackURL"],
     mp3filename: filename,
   };
   return record;
@@ -114,5 +92,8 @@ module.exports = {
   getAudioInfo,
 };
 
-/* Download audio files locally. */
-pullRecords();
+// /* Download audio files locally. */
+// pullRecords();
+
+// Metadata from XML feed:
+// Description, Country, Format, Theme, Language
