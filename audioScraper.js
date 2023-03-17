@@ -3,6 +3,7 @@ var parseString = require("xml2js").parseString;
 var http = require("https");
 const fs = require("fs");
 
+/* Takes an RSS feed url and returns JSON object. */
 const xmlToJson = (url) => {
   return new Promise((resolve, reject) => {
     var req = http.get(url, function (res) {
@@ -29,6 +30,7 @@ const xmlToJson = (url) => {
   });
 };
 
+/* Calls helper functions to locally download mp3s and returns associated metadata. */
 const pullRecords = async () => {
   var data = await xmlToJson(
     "https://rights.culturalsurvival.org/blueprint-xml"
@@ -37,8 +39,6 @@ const pullRecords = async () => {
   for (const item of newData) {
     item["SoundCloudCleaned"] = [cleanUrl(item["SoundCloud"][0])];
   }
-  // FIXME: remove testData and replace with newData to update all audio from XML instead of first 6
-  // const testData = newData.slice(0, 6);
   for (const item of newData) {
     item["SoundCloud Metadata"] = await getAudioInfo(
       item["SoundCloudCleaned"][0]
@@ -47,16 +47,19 @@ const pullRecords = async () => {
   return newData;
 };
 
+/* Removes excess characters from URL. */
 const cleanUrl = (url) => {
   let newUrl = url.split("?");
   return newUrl[0];
 };
 
+/* Normalizes song title string to fit Windows filepath requirements. */
 const cleanSongTitle = (songTitle) => {
   let newSongTitle = songTitle.replace(/[^a-z0-9]/gi, "");
   return newSongTitle;
 };
 
+/* Takes SoundCloud URL, downloads mp3 locally, and returns all relevant metadata. */
 const getAudioInfo = async (url) => {
   const client = new SoundCloud.Client();
   let song = await client.getSongInfo(url);

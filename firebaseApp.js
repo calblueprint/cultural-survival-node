@@ -19,9 +19,11 @@ const app = initializeApp(firebaseConfig);
 
 const db = getFirestore(app);
 
+/* Turns comma separated string into list of strings. */
 function stringCleanup(item, string) {
   if (string in item) {
     var arr = item[string][0].split(", ");
+    /* Remove special extraneous strings related to Venezuela and Bolivia. */
     if (string == "Country") {
       arr = arr.filter(
         (elem) =>
@@ -34,6 +36,8 @@ function stringCleanup(item, string) {
   }
 }
 
+/* Pushes mp3 to Firebase Storage and sets and pushes metadata record to Firestore.
+  Deletes local mp3s when finished. */
 async function setAudio() {
   const records = await pullRecords();
   for (const item of records) {
